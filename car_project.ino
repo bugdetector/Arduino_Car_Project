@@ -22,18 +22,21 @@ File file;
 char lastbluetoothch = 'g';
 short brightness;
 short distance;
-short right_Motor=0, left_Motor=0;
+short right_Motor=-1, left_Motor=-1;
 
 void bluetoothmodule();
 void light();
 void dist();
 void writeToFile();
+void mutebuz();
+void goman();
 
-
-Task one(100,TASK_FOREVER,&bluetoothmodule);
+Task one(125,TASK_FOREVER,&bluetoothmodule);
 Task two(1000,TASK_FOREVER,&light);
 Task three(50,TASK_FOREVER,&dist);
 Task four(2000,TASK_FOREVER,&writeToFile);
+Task five(0,1,&mutebuz);
+Task six(100,TASK_FOREVER,&goman);
 
 Scheduler runner;
 void setup()
@@ -75,12 +78,15 @@ void setup()
   runner.addTask(two);
   runner.addTask(three);
   runner.addTask(four);
-
+  runner.addTask(six);
+  
   one.enable();
   two.enable();
   three.enable();
   four.setInterval(2000);
   four.enable();
+  six.setInterval(500);
+  six.enable();
 }
 
 void loop()
@@ -119,7 +125,6 @@ void bluetoothmodule(){
 void startEngine(short rightMotor, int leftMotor){
   right_Motor = rightMotor;
   left_Motor = leftMotor;
-  goman();
 }
 void goman(){
   if(left_Motor==-1 || right_Motor == -1){
@@ -162,6 +167,10 @@ int calcdistance(){
 }
 void buz(){
   tone(buzzer, 1000);
-  delay(100);
+  runner.addTask(five);
+  five.setInterval(100);
+  five.enable();
+}
+void mutebuz(){
   noTone(buzzer);
 }
