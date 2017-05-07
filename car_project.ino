@@ -19,9 +19,9 @@ SdVolume volume;
 SdFile root;
 File file;
 
-char bluetoothch;
-int brightness;
-int distance;
+char lastbluetoothch = 'g';
+short brightness;
+short distance;
 short right_Motor=0, left_Motor=0;
 
 void bluetoothmodule();
@@ -64,7 +64,7 @@ void setup()
   if (!SD.begin(chipSelect)) {
     Serial.println(2);
   } else {
-    file = SD.open("data.txt", FILE_WRITE);    // open file for writing
+    file = SD.open("test.txt", FILE_WRITE);    // open file for writing
     if (!file) {  // if file can be opened, write to it
       Serial.println(3);
     }
@@ -80,6 +80,7 @@ void setup()
   two.enable();
   three.enable();
   four.setInterval(2000);
+  four.enable();
 }
 
 void loop()
@@ -87,21 +88,31 @@ void loop()
   runner.execute();
 }
 void writeToFile(){
-  file = SD.open("data.txt", FILE_WRITE);
-  char buf[100];
-  sprintf(buf,"%c\t%d\t%d\t%d\t%d",bluetoothch,brightness,distance,right_Motor,left_Motor);
-  file.println(buf);
+  file = SD.open("test.txt", FILE_WRITE);
+  file.print(lastbluetoothch);
+  file.print("  ");
+  file.print(brightness);
+  file.print("  ");
+  file.print(distance);
+  file.print("  ");
+  file.print(right_Motor);
+  file.print("  ");
+  file.println(left_Motor);
   file.close();
+  //sprintf(buf,"%c\t%d\t%d\t%d\t%d",bluetoothch,brightness,distance,right_Motor,left_Motor);
 }
 void bluetoothmodule(){
-  char bluetoothch = bluetooth.read();
-  switch (bluetoothch){
-    case 'a': startEngine(1,0); break;
-    case 'd': startEngine(0,1); break;
-    case 'w': startEngine(1,1); break;
-    case 's': startEngine(0,0); break;
-    case 'g': startEngine(-1,-1); break; //stop engine
-    defaut: goman();
+  if(bluetooth.available()){
+    char bluetoothch = bluetooth.read();
+    lastbluetoothch = bluetoothch;
+    switch (bluetoothch){
+      case 'a': startEngine(1,0); break;
+      case 'd': startEngine(0,1); break;
+      case 'w': startEngine(1,1); break;
+      case 's': startEngine(0,0); break;
+      case 'g': startEngine(-1,-1); break; //stop engine
+      defaut: goman();
+    }
   }
     
 }
